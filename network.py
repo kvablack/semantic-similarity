@@ -99,7 +99,7 @@ class DoubleNetwork(object):
                 self.train_batch(batch, eta, truncate)
 
             if test_data:
-                print("Done epoch {0}. Test data result:\n{1}".format(i, test_eval(test_data[0], test_data[1])))
+                print("Done epoch {0}. Test data result:\n{1}".format(i, self.test_eval(test_data[0], test_data[1])))
             else:
                 print("Done epoch %d" % i)
 

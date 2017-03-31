@@ -13,7 +13,7 @@ class Loader(object):
     def load_word_vectors(self):
         """read in word vector data"""
         self.wordvecs = {} 
-        with open("./glove/glove.6B.100d.txt", "r") as f:
+        with open("glove\\glove.6B.100d.txt", "r", encoding="UTF-8") as f:
             for line in f:
                 l = line.split(' ')
                 self.wordvecs[l[0]] = [float(i) for i in l[1:]]
@@ -23,7 +23,7 @@ class Loader(object):
         s1 = [] # first sentences
         s2 = [] # second sentences
         
-        with open("./sts2015-en-post/data/clean/text.clean", "r") as f:
+        with open("sts2015-en-post\\data\\clean\\text.clean", "r", encoding="UTF-8") as f:
             for line in f:
                 l = line.split('\t')
         
@@ -54,9 +54,10 @@ class Loader(object):
 loader = Loader()
 loader.load_word_vectors()
 loader.load_training_data()
-net = egbert.DoubleNetwork(100, 6)
+net = network.DoubleNetwork(100, 6)
 
 test_x1 = loader.sentence_to_veclist("it's pretty difficult to imagine a person with social anxiety disorder being an extrovert.")
 test_x2 = loader.sentence_to_veclist("on the surface, it does seem like social anxiety disorder and extroversion shouldn't both exist in the same person.")
 
+print("starting SGD")
 net.SGD(list(zip(loader.sentences1, loader.sentences2, loader.scores)), 30, 0.01, 30, 100, (test_x1, test_x2))

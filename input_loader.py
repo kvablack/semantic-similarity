@@ -6,8 +6,9 @@ class Loader(object):
 
     def __init__(self):
         self.wordvecs = {}
-        self.scores = [] # one-hot vectors of similarity ratings from 0 to 5
-        self.sentences1 = [] # list of lists of word vectors representing list of input sentences
+        self.scores = []  # one-hot vectors of similarity ratings from 0 to 5
+        # list of lists of word vectors representing list of input sentences
+        self.sentences1 = [] 
         self.sentences2 = []
     
     def load_word_vectors(self):
@@ -19,7 +20,7 @@ class Loader(object):
                 self.wordvecs[l[0]] = [float(i) for i in l[1:]]
 
     def load_training_data(self):
-        # read in training data
+        """read in training data"""
         s1 = [] # first sentences
         s2 = [] # second sentences
         

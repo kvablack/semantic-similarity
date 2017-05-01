@@ -44,7 +44,7 @@ class Network(object):
         x -- a list of vectors that were used as input to the network
         s -- the list of pre-activation state vectors produced by feedforward(x)
         h -- the list of post-activation state vectors produced by feedforward(x)
-        nabla_start -- the gradient of the error function with respect to the final h, 
+        nabla_start -- the gradient of the error function with respect to the final h,
         to be used as a starting point for backpropagation
         truncate -- the number of layers to propagate backwards (default 100)
         """
@@ -59,7 +59,7 @@ class Network(object):
         delta = np.multiply(nabla_start, sigmoid_prime(s[n-1]))  # start with the delta of the final layer
 
         # sum gradients either all the way to layer 0 or layer (n-truncate)
-        for i in range(n-1, max(-1, n-truncate-1), -1): 
+        for i in range(n-1, max(-1, n-truncate-1), -1):
             if i > 0: nabla_U += np.outer(delta, h[i-1])  # add grad(C) wrt hidden_weight for layer i
             nabla_W += np.outer(delta, x[i])              # add grad(C) wrt input_weight for layer i
             nabla_b += delta                              # add grad(C) wrt hidden_bias for layer i
@@ -68,9 +68,9 @@ class Network(object):
         return nabla_U, nabla_W, nabla_b  # grad(C) wrt hidden_weight, input_weight, hidden_bias, respectively
 
 class DoubleNetwork(object):
-    """combination of two Network objects that takes the output of each network, 
+    """combination of two Network objects that takes the output of each network,
     concatenates them, applies a final weight and bias, and transforms the result using softmax
-    in order to output a distribution representative of the probability of the two 
+    in order to output a distribution representative of the probability of the two
     network inputs being the a given class
     """
     def __init__(self, wordsize, num_classes):
@@ -102,7 +102,7 @@ class DoubleNetwork(object):
         x2 -- list of input vectors for the second network
         """
         s1, h1 = self.net1.feedforward(x1)
-        s2, h2 = self.net2.feedforward(x2) 
+        s2, h2 = self.net2.feedforward(x2)
         h = np.concatenate((h1[-1], h2[-1]))  # output of two networks combined
 
         p = softmax(np.dot(self.final_weight, h) + self.final_bias)  # final output probability distribution
@@ -195,7 +195,7 @@ class DoubleNetwork(object):
         s1, s2, h1, h2, h, p = self.feedforward(x1, x2)
         return p
 
-       
+
 
 def sigmoid(x):
     return 1.0/(1.0+np.exp(-x))
@@ -208,7 +208,7 @@ def softmax(x):
 
 def cost(p, y):
     return -1 * np.asscalar(np.log(p.tolist()[y.tolist().index([1])])) # -ln(p[j]) where j is the correct class
- 
+
 '''net = DoubleNetwork(10, 6)
 sentence1 = [np.random.normal(0, 1, (10, 1)) for i in range(7)]
 sentence2 = [np.random.normal(0, 1, (10, 1)) for i in range(4)]

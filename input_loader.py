@@ -6,7 +6,7 @@ class Loader(object):
 
     def __init__(self):
         self.wordvecs = {}
-        self.scores = []  # one-hot vectors of similarity ratings from 0 to 5
+        self.scores = []  # averaged similarity scores from 0 to 5
         # list of lists of word vectors representing list of input sentences
         self.sentences1 = []
         self.sentences2 = []
@@ -28,10 +28,7 @@ class Loader(object):
             for line in f:
                 l = line.split('\t')
 
-                # convert category to one-hot vector
-                s = [0, 0, 0, 0, 0, 0]
-                s[round(float(l[0]))] = 1
-                self.scores.append(np.reshape(np.array(s), (6, 1)))
+                self.scores.append(float(l[0]))
 
                 s1.append(l[4])
                 s2.append(l[5])
@@ -46,7 +43,7 @@ class Loader(object):
 
     def sentence_to_veclist(self, s):
         """convert input sentence (as a string) to a list of vectors for the neural network to operate on"""
-        words = nltk.word_tokenize(s)
+        words = nltk.word_tokenize(s.lower())
         return [np.reshape(np.array(self.wordvecs.get(words[i])), (100, 1)) for i in range(len(words)) if words[i] in self.wordvecs.keys()]
 
 
@@ -55,10 +52,10 @@ class Loader(object):
 loader = Loader()
 loader.load_word_vectors()
 loader.load_training_data()
-net = network.DoubleNetwork(100, 6)
+net = network.DoubleNetwork(100)
 
 test_x1 = loader.sentence_to_veclist("it's pretty difficult to imagine a person with social anxiety disorder being an extrovert.")
 test_x2 = loader.sentence_to_veclist("on the surface, it does seem like social anxiety disorder and extroversion shouldn't both exist in the same person.")
 
 # print("starting SGD")
-# net.SGD(list(zip(loader.sentences1, loader.sentences2, loader.scores)), 30, 0.01, 30, 100, (test_x1, test_x2))
+# net.SGD(list(zip(loader.sentences1, loader.sentences2, loader.scores)), 50, 0.01, 1000, 100, (test_x1, test_x2))

@@ -73,30 +73,29 @@ class DoubleNetwork(object):
     in order to output a distribution representative of the probability of the two
     network inputs being the a given class
     """
-    def __init__(self, wordsize, num_classes):
+    def __init__(self, wordsize):
         """initializes two Network objects, a final weight to a Gaussian distribution,
         and a final bias to the zero vector
 
         wordsize -- the dimension of the input vectors to the networks
-        num_classes -- the number of classes for the network to categorize into
         """
         self.net1 = Network(wordsize)
         self.net2 = Network(wordsize)
 
-        # a final weight matrix that will transform the concatenation of the two network outputs into a vector with dimension equal to the number of classes
+        # a final weight row matrix that will transform the concatenation of the two network outputs into a scalar
         # initialized to a Gaussian distribution N(0, 0.005) clipped to [-0.01, 0.01]
-        self.final_weight = np.clip(np.random.normal(0, 0.005, (num_classes, 2*wordsize)), -0.01, 0.01)
+        self.final_weight = np.clip(np.random.normal(0, 0.005, (1, 2*wordsize)), -0.01, 0.01)
 
-        self.final_bias = np.zeros((num_classes, 1))
+        self.final_bias = 0
 
     def feedforward(self, x1, x2):
         """feeds x1 and x2 through the two Network objects, concatenates
-        their inputs, applies a final weight and bias, transforms the
-        output with softmax, and returns 6 lists: s1, s2, h1, h2, h, and p
+        their inputs, applies a final weight and bias, and
+        returns 6 lists: s1, s2, h1, h2, h, and p
         where s1 and s2 are the lists of pre-activation state vectors for each network,
         h1 and h2 are the lists of post-activation state vectors for each network,
         h is the concatenation of the final post-activation state vectors from each network,
-        and p is the softmax-transformed probability distribution over the classes
+        and p is the final output
 
         x1 -- list of input vectors for the first network
         x2 -- list of input vectors for the second network
@@ -105,7 +104,7 @@ class DoubleNetwork(object):
         s2, h2 = self.net2.feedforward(x2)
         h = np.concatenate((h1[-1], h2[-1]))  # output of two networks combined
 
-        p = softmax(np.dot(self.final_weight, h) + self.final_bias)  # final output probability distribution
+        p = np.asscalar(np.dot(self.final_weight, h)) + self.final_bias  # final output
         return s1, s2, h1, h2, h, p
 
     def backprop(self, x1, x2, s1, s2, h1, h2, h, p, target, truncate):
@@ -118,12 +117,12 @@ class DoubleNetwork(object):
         x1 -- a list of vectors that were used as input to the first network
         x2 -- a list of vectors that were used as input to the second network
         s1, s2, h1, h2, h, p -- the output of feedforward(x1, x2)
-        target -- a one-hot column vector corresponding to the correct class
+        target -- the target value (a scalar)
         truncate -- the number of layers to propagate backwards in each network (default 100)
         """
         nabla_f = p - target  # grad(C) wrt final bias
-        nabla_V = np.outer(nabla_f, h)  # grad(C) wrt final weight
-        nabla_h = self.final_weight.T.dot(nabla_f)  # grad(C) wrt final hidden vector, used as starting point for backprop of each network
+        nabla_V = (nabla_f * h).T  # grad(C) wrt final weight
+        nabla_h = nabla_f * self.final_weight.T  # grad(C) wrt final hidden vector, used as starting point for backprop of each network
 
         nabla_U1, nabla_W1, nabla_b1 = self.net1.backprop(x1, s1, h1, np.split(nabla_h, 2)[0], truncate)
         nabla_U2, nabla_W2, nabla_b2 = self.net2.backprop(x2, s2, h2, np.split(nabla_h, 2)[1], truncate)
@@ -172,7 +171,7 @@ class DoubleNetwork(object):
         nabla_b1 = np.zeros(self.net1.hidden_bias.shape)
         nabla_b2 = np.zeros(self.net2.hidden_bias.shape)
         nabla_V = np.zeros(self.final_weight.shape)
-        nabla_f = np.zeros(self.final_bias.shape)
+        nabla_f = 0
         for x1, x2, target in batch:
             s1, s2, h1, h2, h, p = self.feedforward(x1, x2)
             # adds the results of backprop to each corresponding nabla_ variable

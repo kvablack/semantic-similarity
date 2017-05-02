@@ -1,5 +1,6 @@
 import random
 import numpy as np
+import pickle
 
 class Network(object):
     """a recurrent neural network with a bias at each step
@@ -129,7 +130,7 @@ class DoubleNetwork(object):
 
         return nabla_U1, nabla_W1, nabla_b1, nabla_U2, nabla_W2, nabla_b2, nabla_V, nabla_f
 
-    def SGD(self, data, batch_size, eta, epochs, truncate, test_data=None):
+    def SGD(self, data, batch_size, eta, epochs, truncate, test_data=None, save_name=None):
         """trains the DoubleNetwork using stochastic gradient descent by dividing
         the data into batches of batch_size and running train_batch on each one, repeating
         for a certain number of epochs
@@ -143,6 +144,8 @@ class DoubleNetwork(object):
         test_data -- an optional tuple in the form (x1, x2) and if included,
         will be evaluated and the resulting probability distribution p will be
         printed after each epoch (default None)
+        save_name -- an optional string specifying the name of a pickle file to save
+        all the weights and biases to after each epoch
         """
 
         for i in range(epochs):
@@ -155,6 +158,10 @@ class DoubleNetwork(object):
                 print("Done epoch {0}. Test data result:\n{1}".format(i, self.test_eval(test_data[0], test_data[1])))
             else:
                 print("Done epoch %d" % i)
+
+            if save_name:
+                with open(save_name, "wb") as f:
+                    pickle.dump(self, f)
 
     def train_batch(self, batch, eta, truncate):
         """updates the weights and biases of the DoubleNetwork using
